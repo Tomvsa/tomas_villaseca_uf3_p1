@@ -5,18 +5,24 @@ namespace App\Http\Controllers;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\Request;
 use Symfony\Component\Routing\Annotation\Route;
+use App\Models\Film;
+use Illuminate\Support\Facades\DB;
 
 class FilmController extends Controller
 {
 
-    /**
-     * Read films from storage
-     */
     public static function readFilms(): array
     {
-        $films = Storage::json('/public/films.json');
-        return $films;
+        // Retrieve all films from the database using Query Builder
+        $filmsFromDatabase = DB::table('films')->get()->toArray();
+        $filmsFromDatabase = json_decode(json_encode($filmsFromDatabase), true);
+        // Retrieve films from the JSON file
+        $filmsFromJson = Storage::json('/public/films.json');
+        // Merge films from the database and JSON file
+        $arrayFilms = array_merge($filmsFromDatabase, $filmsFromJson);
+        return $arrayFilms;
     }
+
     /**
      * List films older than input year 
      * if year is not infomed 2000 year will be used as criteria
@@ -169,31 +175,46 @@ class FilmController extends Controller
             'country' => $request->input('country'),
             'duration' => $request->input('duration'),
             'img_url' => $request->input('img_url'),
+            'created_at' => now(),
+            'updated_at' => now()
         ];
 
-
+        if($_ENV['USE_DATABASE'] == 'SQL'){
+        // Film does not exist, add it and show all films
         if (!$this->isFilm($filmData['name'])) {
-            // Film does not exist, add it and show all films
-            $films = $this->readFilms();
-            $films[] = $filmData;
-
-            // Save the updated films array to the JSON file
-            Storage::put('/public/films.json', json_encode($films));
-
+            // Save the film data to the database using Query Builder
+            DB::table('films')->insert($filmData);
             // Return the view of the form with a success message
             return $this->listFilms()->with('success', 'Film added successfully.');
         } else {
             // Film already exists, go back to the form with an error message
             return redirect('/')->with('error', 'Film already exists');
         }
+        }else{
+            if (!$this->isFilm($filmData['name'])) {
+                // Film does not exist, add it and show all films
+                $films = $this->readFilms();
+                $films[] = $filmData;
+    
+                // Save the updated films array to the JSON file
+                Storage::put('/public/films.json', json_encode($films));
+    
+                // Return the view of the form with a success message
+                return $this->listFilms()->with('success', 'Film added successfully.');
+            } else {
+                // Film already exists, go back to the form with an error message
+                return redirect('/')->with('error', 'Film already exists');
+            }
+        }
+
+
     }
 
 
     /**
      * Check if a film with the given name already exists
-     * @param string $filmName
      */
-    public function isFilm($filmName)
+    public function isFilm($filmName): bool
     {
         $films = $this->readFilms();
         foreach ($films as $film) {

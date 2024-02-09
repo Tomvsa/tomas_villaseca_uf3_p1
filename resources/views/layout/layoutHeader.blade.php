@@ -16,11 +16,13 @@
         <h1 class="display-4">Lista de Peliculas</h1>
         <nav class="navbar navbar-expand-lg navbar-light bg-light">
             <ul class="navbar-nav mr-auto">
-                <li class="nav-item"><a class="nav-link" href="{{ url('/filmout/films') }}">Pelis</a></li>
-                <li class="nav-item"><a class="nav-link" href="{{ url('/filmout/oldFilms') }}">Pelis antiguas</a></li>
-                <li class="nav-item"><a class="nav-link" href="{{ url('/filmout/newFilms') }}">Pelis nuevas</a></li>
+                <li class="nav-item"><a class="nav-link" href="{{ url('/filmout/films') }}">Films</a></li>
+                <li class="nav-item"><a class="nav-link" href="{{ url('/filmout/oldFilms') }}">Olds Films</a></li>
+                <li class="nav-item"><a class="nav-link" href="{{ url('/filmout/newFilms') }}">New Films</a></li>
                 <li class="nav-item"><a class="nav-link" href="{{ url('/filmout/countFilms') }}">Count films</a></li>
                 <li class="nav-item"><a class="nav-link" href="{{ url('/filmout/sortFilms') }}">Sort films</a></li>
+                <li class="nav-item"><a class="nav-link" href="{{ url('/actorout/actors') }}">Actors</a></li>
+                <li class="nav-item"><a class="nav-link" href="{{ url('/actorout/countActors') }}">Count Actors</a></li>
                 <li class="nav-item"><a class="nav-link" href="{{ url('/') }}">Home</a></li>
             </ul>
         </nav>

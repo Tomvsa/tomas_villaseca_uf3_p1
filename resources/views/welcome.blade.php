@@ -17,7 +17,7 @@
 
     <div class="row">
         <div class="col-md-6">
-            <h2>Add Film</h2>
+            
             @if(session('success'))
             <div class="alert alert-success">
                 {{ session('success') }}
@@ -29,6 +29,24 @@
                 {{ session('error') }}
             </div>
             @endif
+            <h2>Actors</h2>
+            <form action="{{ route('listActorsByDecade') }}" method="GET">
+                @csrf
+                <div class="form-group">
+                    <i class="bi bi-calendar-date"></i>
+
+                    <label for="decadeSelect">Select Decade:</label>
+                    <select class="form-control" id="decadeSelect" name="year">
+                        @for($year = 2020; $year >= 1900; $year -= 10)
+                        <option value="{{ $year }}" @if(request('year')==$year) selected @endif>{{ $year }}s</option>
+                        @endfor
+                    </select>
+
+                    <button type="submit" class="btn btn-primary">Filter</button>
+                </div>
+            </form>
+
+            <h2>Add Film</h2>
 
             <form action="{{ route('createFilm') }}" method="POST">
                 @csrf

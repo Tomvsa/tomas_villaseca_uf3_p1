@@ -54,27 +54,26 @@
     @include('layout.layoutHeader')
     <h1>{{ $title }}</h1>
 
-    @if(empty($films))
-    <p class="no-films">No se ha encontrado ninguna película</p>
+    @if(empty($actors))
+    <p class="no-films">No se ha encontrado ningun actor</p>
     @else
     <table>
         <tr>
-            @foreach($films[5] as $key => $value)
+            @foreach($actors[0] as $key => $value)
             <th>{{ $key }}</th>
             @endforeach
         </tr>
 
-        @foreach($films as $film)
+        @foreach($actors as $actor)
         <tr>
-            <td>{{ $film['id'] ?? '' }}</td>
-            <td>{{ $film['name'] }}</td>
-            <td>{{ $film['year'] }}</td>
-            <td>{{ $film['genre'] }}</td>
-            <td>{{ $film['country'] }}</td>
-            <td>{{ $film['duration'] }} minutos</td>
-            <td><img src="{{ $film['img_url'] }}" alt="{{ $film['name'] }}"></td>
-            <td>{{ $film['created_at'] ?? '' }}</td>
-            <td>{{ $film['updated_at'] ?? '' }}</td>
+            <td>{{ $actor['id'] }}</td>
+            <td>{{ $actor['name'] }}</td>
+            <td>{{ $actor['surname'] }}</td>
+            <td>{{ $actor['birthdate'] }}</td>
+            <td>{{ $actor['country'] }}</td>
+            <td><img src="{{ $actor['img_url'] }}" alt="{{ $actor['name'] }}"></td>
+            <td>{{ $actor['created_at'] }}</td>
+            <td>{{ $actor['updated_at'] }}</td>
         </tr>
         @endforeach
     </table>
