@@ -59,19 +59,22 @@
     @else
     <table>
         <tr>
-            @foreach($films[0] as $key => $value)
+            @foreach($films[5] as $key => $value)
             <th>{{ $key }}</th>
             @endforeach
         </tr>
 
         @foreach($films as $film)
         <tr>
+            <td>{{ $film['id'] ?? '' }}</td>
             <td>{{ $film['name'] }}</td>
             <td>{{ $film['year'] }}</td>
             <td>{{ $film['genre'] }}</td>
-            <td><img src="{{ $film['img_url'] }}" alt="{{ $film['name'] }}"></td>
             <td>{{ $film['country'] }}</td>
             <td>{{ $film['duration'] }} minutos</td>
+            <td><img src="{{ $film['img_url'] }}" alt="{{ $film['name'] }}"></td>
+            <td>{{ $film['created_at'] ?? '' }}</td>
+            <td>{{ $film['updated_at'] ?? '' }}</td>
         </tr>
         @endforeach
     </table>

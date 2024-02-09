@@ -98,7 +98,7 @@ class ActorController extends Controller
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
-    public function deleteActor($id, Request $request)
+    public function deleteActor($id)
 {
     $actor = DB::table('actors')->find($id);
     if (!$actor) {
