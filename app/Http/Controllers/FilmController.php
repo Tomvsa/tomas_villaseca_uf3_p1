@@ -61,20 +61,23 @@ class FilmController extends Controller
         }
         return view('films.list', ["films" => $new_films, "title" => $title]);
     }
+
     /**
      * List all films or filter by year or genre
      */
     public function listFilms($year = null, $genre = null)
     {
         $films_filtered = [];
-
         $title = "Listado de todas las pelis";
         $films = FilmController::readFilms();
+
+        $currentPage = request()->get('page', 1); // Get actual page
+        $perPage = 5; // number films per page
 
 
         //if year and genre are null
         if (is_null($year) && is_null($genre))
-            return view('films.list', ["films" => $films, "title" => $title]);
+            // return view('films.list', ["films" => $films, "title" => $title]);
 
         //list based on year or genre informed
         foreach ($films as $film) {
@@ -89,7 +92,16 @@ class FilmController extends Controller
                 $films_filtered[] = $film;
             }
         }
-        return view("films.list", ["films" => $films_filtered, "title" => $title]);
+        $totalPages = intval(ceil(count($films) / $perPage));
+        // Slice films for the current page
+        $paginatedFilms = array_slice($films, ($currentPage - 1) * $perPage, $perPage);
+        return view("films.list", [
+            "title" => $title,
+            "currentPage" => $currentPage,
+            "perPage" => $perPage,
+            "totalPages" => $totalPages,
+            "paginatedFilms" => $paginatedFilms
+        ]);
     }
 
     /**
@@ -179,26 +191,26 @@ class FilmController extends Controller
             'updated_at' => now()
         ];
 
-        if($_ENV['USE_DATABASE'] == 'SQL'){
-        // Film does not exist, add it and show all films
-        if (!$this->isFilm($filmData['name'])) {
-            // Save the film data to the database using Query Builder
-            DB::table('films')->insert($filmData);
-            // Return the view of the form with a success message
-            return $this->listFilms()->with('success', 'Film added successfully.');
+        if ($_ENV['USE_DATABASE'] == 'SQL') {
+            // Film does not exist, add it and show all films
+            if (!$this->isFilm($filmData['name'])) {
+                // Save the film data to the database using Query Builder
+                DB::table('films')->insert($filmData);
+                // Return the view of the form with a success message
+                return $this->listFilms()->with('success', 'Film added successfully.');
+            } else {
+                // Film already exists, go back to the form with an error message
+                return redirect('/')->with('error', 'Film already exists');
+            }
         } else {
-            // Film already exists, go back to the form with an error message
-            return redirect('/')->with('error', 'Film already exists');
-        }
-        }else{
             if (!$this->isFilm($filmData['name'])) {
                 // Film does not exist, add it and show all films
                 $films = $this->readFilms();
                 $films[] = $filmData;
-    
+
                 // Save the updated films array to the JSON file
                 Storage::put('/public/films.json', json_encode($films));
-    
+
                 // Return the view of the form with a success message
                 return $this->listFilms()->with('success', 'Film added successfully.');
             } else {
@@ -206,8 +218,6 @@ class FilmController extends Controller
                 return redirect('/')->with('error', 'Film already exists');
             }
         }
-
-
     }
 
 
