@@ -236,4 +236,32 @@ class FilmController extends Controller
         // Film name does not exist
         return false;
     }
+
+    /**
+     * Get all films via http:
+     * localhost:8000/api/films
+     * @return \Response
+     */
+    public function getFilms()
+    {
+        $films = DB::table('films')
+            ->get()
+            ->toArray();
+        $films= json_decode(json_encode($films), true);
+    
+        $film_actors = DB::Table('film_actors')->get()->toArray();
+        $film_actors = json_decode(json_encode($film_actors), true);
+        foreach ($films as &$film) { // Note the "&" before $film
+            $film['actors'] = [];
+            foreach ($film_actors as $film_actor) {
+                if ($film_actor['film_id'] === $film['id']) {
+                    $actor = DB::table('actors')->where('id', $film_actor['actor_id'])->first();
+                    $actor = json_decode(json_encode($actor), true);
+                    $film['actors'][] = $actor;
+                }
+            }
+        }
+    
+       return  response()->json(['films' => $films]);
+    }
 }
