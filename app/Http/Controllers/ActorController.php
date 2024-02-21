@@ -2,26 +2,27 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
+use App\Models\Actor;
+
 class ActorController extends Controller
 {
-     /**
+    /**
      * Retrieve all actors from the database.
      * @return array
      */
     public function readActors(): array
     {
-        $actors = DB::table('actors')->select('*')->get();
-        return $actors->toArray();
+        return Actor::all()->toArray();
     }
 
     /**
      * Display a list of all actors.
      * @return \Illuminate\View\View
      */
-    public function listActors(){
-        $actors = json_decode(json_encode($this->readActors()), true);  
+    public function listActors()
+    {
+        $actors = $this->readActors();
         return view('actors.list', ["actors" => $actors, "title" => "Actor List"]);
     }
 
@@ -34,13 +35,9 @@ class ActorController extends Controller
     {
         $startYear = $request->input('year');
         $endYear = $startYear + 9;
-    
-        $actors = DB::table('actors')
-            ->select('*')
-            ->whereBetween('birthdate', [$startYear . '-01-01', $endYear . '-12-31'])
-            ->get()
-            ->toArray();
-        $actors = json_decode(json_encode($actors), true);
+        
+        $actors = Actor::whereBetween('birthdate', [$startYear . '-01-01', $endYear . '-12-31'])->get()->toArray();
+        
         return view('actors.list', ["actors" => $actors, "title" => "Actor List by decade"]);
     }
     
@@ -50,7 +47,7 @@ class ActorController extends Controller
      */
     public function countActors()
     {
-        $actorCount = DB::table('actors')->count();
+        $actorCount = Actor::count();
         return view('actors.counter', ["total_actors" => $actorCount, "title" => "total actors number"]);
     }
 
@@ -58,38 +55,25 @@ class ActorController extends Controller
      * Create a new actor.
      * @param Request $request
      */
-    public function createActor(Request $request){
-        $actorData = [
-            'name' => $request->input('name'),
-            'surname' => $request->input('surname'),
-            'birthdate' => $request->input('country'),
-            'img_url' => $request->input('img_url')
-        ];
+    public function createActor(Request $request)
+    {
+        $actorData = $request->only(['name', 'surname', 'birthdate', 'country', 'img_url']);
 
-        if(!$this->isActor($actorData['name'])){
-            DB::table('actos')->insert($actorData);
+        if (!$this->isActor($actorData['name'])) {
+            Actor::create($actorData);
             //return  
-        }else{
+        } else {
             return redirect('')->with('error', 'Actor already exists');
         }
     }
 
-
     /**
-     * Check if a actor with the given name already exists
+     * Check if an actor with the given name already exists
      * @param string $actorName
      */
     public function isActor($actorName)
     {
-        $actors = $this->readActors();
-        foreach ($actors as $actor) {
-            if (strtolower($actor['name']) === strtolower($actorName)) {
-                // Film name already exists
-                return true;
-            }
-        }
-        // Actor name does not exist
-        return false;
+        return Actor::where('name', 'LIKE', $actorName)->exists();
     }
 
     /**
@@ -99,16 +83,16 @@ class ActorController extends Controller
      * @return \Illuminate\Http\JsonResponse
      */
     public function deleteActor($id)
-{
-    $actor = DB::table('actors')->find($id);
-    if (!$actor) {
-        return response()->json(['action' => 'delete', 'status' => false, 'error' => 'Actor not found']);
+    {
+        $actor = Actor::find($id);
+        if (!$actor) {
+            return response()->json(['action' => 'delete', 'status' => false, 'error' => 'Actor not found']);
+        }
+        try {
+            $actor->delete();
+            return response()->json(['action' => 'delete', 'status' => true]);
+        } catch (\Exception $e) {
+            return response()->json(['action' => 'delete', 'status' => false, 'error' => $e->getMessage()]);
+        }
     }
-    try {
-        DB::table('actors')->where('id', $id)->delete();
-        return response()->json(['action' => 'delete', 'status' => true]);
-    } catch (\Exception $e) {
-        return response()->json(['action' => 'delete', 'status' => false, 'error' => $e->getMessage()]);
-    }
-}
 }

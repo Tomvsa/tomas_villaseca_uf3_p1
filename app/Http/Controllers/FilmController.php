@@ -13,12 +13,8 @@ class FilmController extends Controller
 
     public static function readFilms(): array
     {
-        // Retrieve all films from the database using Query Builder
-        $filmsFromDatabase = DB::table('films')->get()->toArray();
-        $filmsFromDatabase = json_decode(json_encode($filmsFromDatabase), true);
-        // Retrieve films from the JSON file
-        $filmsFromJson = Storage::json('/public/films.json');
-        // Merge films from the database and JSON file
+        $filmsFromDatabase = Film::all()->toArray();
+        $filmsFromJson = json_decode(Storage::get('/public/films.json'), true);
         $arrayFilms = array_merge($filmsFromDatabase, $filmsFromJson);
         return $arrayFilms;
     }
